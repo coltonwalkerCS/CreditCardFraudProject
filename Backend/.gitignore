@@ -1,0 +1,39 @@
+# ======================
+# Secrets / environment
+# ======================
+.env
+secrets/
+secrets/.env
+
+# ======================
+# Python / Poetry
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Poetry virtual environment (in-project)
+.venv/
+
+# ======================
+# Alembic
+# ======================
+alembic/versions/__pycache__/
+
+# ======================
+# OS / Editor noise
+# ======================
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# ======================
+# Logs
+# ======================
+*.log

@@ -1,0 +1,135 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Enum card_brand {
+  VISA
+  MASTERCARD
+  AMEX
+}
+
+Enum transaction_status {
+  APPROVED
+  DECLINED
+  REVERSED
+}
+
+Enum alert_severity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+Enum alert_status {
+  OPEN
+  ACKED
+  RESOLVED
+  FALSE_POSITIVE
+}
+
+Enum merchant_category {
+  GROCERY
+  GAS
+  RESTAURANT
+  TRAVEL
+  ONLINE_RETAIL
+}
+
+Enum finding_code {
+  LARGE_AMOUNT
+  VELOCITY
+  IMPOSSIBLE_TRAVEL
+  NEW_MERCHANT
+  CATEGORY_SPIKE
+}
+
+Enum alert_action_type {
+  ACK
+  RESOLVE
+  MARK_FALSE_POSITIVE
+  ESCALATE
+}
+
+Enum actor_type {
+  USER
+  ANALYST
+  SYSTEM
+}
+
+Table users {
+  id uuid4 [primary key]
+  username varchar
+  created_at timestamp
+}
+
+Enum card_status {
+  ACTIVE
+  FROZEN
+  REPLACED
+}
+
+Table cards {
+  id uuid4 [primary key]
+  user_id uuid4
+  last4 integer
+  brand card_brand
+  status card_status
+  exp_month integer
+  exp_year integer
+  created_at datetime
+}
+Ref user_cards: cards.user_id > users.id
+
+Table merchant {
+  id uuid4 [primary key]
+  name varchar
+  category merchant_category
+  created_at datetime
+}
+
+Table transactions {
+  id uuid4 [primary key]
+  card_id uuid4
+  user_id uuid4
+  merchant_id uudi4
+  amount decimal
+  occured_at datetime
+  status transaction_status
+  created_at datetime
+}
+
+Ref card_transaction: transactions.card_id > cards.id
+Ref user_transaction: transactions.user_id > users.id
+Ref merchant_transaction: transactions.merchant_id > merchant.id
+
+Table alerts {
+  id uuid4 [primary key]
+  transaction_id uuid4
+  user_id uuid4
+  card_id uuid4
+  severity alert_severity
+  status alert_status
+  created_at datetime
+  updated_at datetime
+}
+Ref transaction_alert: alerts.transaction_id > transactions.id
+Ref user_alert: alerts.user_id > users.id
+Ref card_alert: alerts.card_id > cards.id
+
+Table alert_findings {
+  id uuid4 [primary key]
+  alert_id uuid4
+  code finding_code
+  created_at datetime
+}
+
+Ref alert_finding: alert_findings.alert_id > alerts.id
+
+Table alert_actions {
+  id uuid4 [primary key]
+  alert_id uuid4
+  action alert_action_type
+  actor_type actor_type
+  created_at datetime
+  updated_at datetime
+}
+Ref alert_action: alert_actions.alert_id > alerts.id
