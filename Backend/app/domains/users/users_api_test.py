@@ -4,16 +4,17 @@ from fastapi.testclient import TestClient
 
 
 def test_create_user_success(client: TestClient):
-    resp = client.post("/api/v1/users", json={"username": "colton"})
+    resp = client.post("/api/v1/users", json={"username": "testusername"})
     assert resp.status_code == 201, resp.text
 
     data = resp.json()
-    assert data["username"] == "colton"
+    assert data["username"] == "testusername"
     assert "id" in data
 
 
 def test_get_user_success(client: TestClient):
-    created = client.post("/api/v1/users", json={"username": "colton"}).json()
+    created = client.post("/api/v1/users", json={"username": "testusername"}).json()
+    print("RESPONSE: ", created)
     user_id = created["id"]
 
     resp = client.get(f"/api/v1/users/{user_id}")
@@ -22,7 +23,6 @@ def test_get_user_success(client: TestClient):
 
 
 def test_get_user_not_found(client: TestClient):
-    # random UUID
     resp = client.get("/api/v1/users/00000000-0000-0000-0000-000000000000")
     assert resp.status_code == 404
 
@@ -32,7 +32,6 @@ def test_create_user_duplicate_username_conflict(client: TestClient):
     assert r1.status_code == 201, r1.text
 
     r2 = client.post("/api/v1/users", json={"username": "dup"})
-    # assuming you map UsernameAlreadyExistsError -> 409
     assert r2.status_code == 409, r2.text
 
 

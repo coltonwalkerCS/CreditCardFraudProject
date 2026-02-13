@@ -19,12 +19,12 @@ class UsernameAlreadyExistsError(Exception):
     pass
 
 
-def create_user(session: Session, dto: UserCreateRequestDto) -> UserResponseDto:
-    existing = repo.get_by_username(session, dto.username)
+def create_user(session: Session, request: UserCreateRequestDto) -> UserResponseDto:
+    existing = repo.get_by_username(session, request.username)
     if existing is not None:
-        raise UsernameAlreadyExistsError(dto.username)
+        raise UsernameAlreadyExistsError(request.username)
 
-    user = repo.users_repo.insert(session, username=dto.username)
+    user = repo.users_repo.insert(session, username=request.username)
 
     session.commit()
     session.refresh(user)

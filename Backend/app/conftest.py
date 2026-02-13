@@ -1,20 +1,36 @@
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from app.core.config import DATABASE_URL_TEST
 from app.db.base import Base
 from app.db.session import get_session
+from app.domains.cards.cards_commands import create_card
+from app.domains.cards.dtos import CardCreateRequestDto
+from app.domains.enums import CardBrand, CardStatus
+from app.domains.users.dtos import UserCreateRequestDto
+from app.domains.users.users_commands import create_user
 from app.main import app
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
+
+
+@pytest.fixture()
+def client(session):
+    def _override_get_session():
+        yield session
+
+    app.dependency_overrides[get_session] = _override_get_session
+    try:
+        yield TestClient(app)
+    finally:
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="session")
 def engine():
-    """
-    Create tables once for the whole test session (Postgres).
-    """
     if not DATABASE_URL_TEST:
         raise RuntimeError(
             "DATABASE_URL_TEST is not set. Add it to Backend/secrets/.env, e.g.\n"
@@ -28,38 +44,70 @@ def engine():
 
 
 @pytest.fixture()
-def db_session(engine):
+def session(engine):
     """
-    Transaction-per-test. Rolls back after each test for isolation.
+    Per-test transaction that survives code calling session.commit()
+    by using a nested transaction (SAVEPOINT) pattern.
     """
     connection = engine.connect()
-    transaction = connection.begin()
+    trans = connection.begin()
 
     SessionLocal = sessionmaker(
         bind=connection, autoflush=False, autocommit=False, future=True
     )
-    session = SessionLocal()
+    s = SessionLocal()
+
+    # Start a SAVEPOINT
+    s.begin_nested()
+
+    # Restart SAVEPOINT after each commit/rollback inside the code under test
+    @event.listens_for(s, "after_transaction_end")
+    def _restart_savepoint(sess, transaction):
+        if transaction.nested and not transaction._parent.nested:
+            sess.begin_nested()
 
     try:
-        yield session
+        yield s
     finally:
-        session.close()
-        transaction.rollback()
+        s.close()
+        trans.rollback()
         connection.close()
 
 
-@pytest.fixture()
-def client(db_session):
-    """
-    FastAPI TestClient that uses the per-test db_session via dependency override.
-    """
+@pytest.fixture
+def make_user(session):
+    def _make(username: str | None = None):
+        username_request = username or f"user_{uuid.uuid4().hex[:8]}"
+        return create_user(session, UserCreateRequestDto(username=username_request))
 
-    def override_get_session():
-        yield db_session
+    return _make
 
-    app.dependency_overrides[get_session] = override_get_session
 
-    with TestClient(app) as c:
-        yield c
+@pytest.fixture
+def make_card(session, make_user):
+    def _make(
+        *,
+        user_id: uuid.UUID | None = None,
+        last4: int = 1234,
+        brand: CardBrand = CardBrand.VISA,
+        status: CardStatus = CardStatus.ACTIVE,
+        exp_month: int = 12,
+        exp_year: int = 2027,
+    ):
+        if user_id is None:
+            user = make_user()
+            user_id = user.id
 
-    app.dependency_overrides.clear()
+        dto = CardCreateRequestDto(
+            user_id=user_id,
+            last4=last4,
+            brand=brand,
+            status=status,
+            exp_month=exp_month,
+            exp_year=exp_year,
+        )
+        return create_card(session, dto)
+
+    return _make
+    return _make
+    return _make

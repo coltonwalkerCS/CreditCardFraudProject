@@ -1,8 +1,8 @@
 import uuid
 
 from app.db.base import Base
-from app.db.enums import ActorType, AlertActionType
 from app.db.models.mixins import TimestampMixin
+from app.domains.enums import ActorType, AlertActionType
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID

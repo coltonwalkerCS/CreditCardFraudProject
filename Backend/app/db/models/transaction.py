@@ -3,8 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 
 from app.db.base import Base
-from app.db.enums import TransactionStatus
 from app.db.models.mixins import TimestampMixin
+from app.domains.enums import TransactionStatus
 from sqlalchemy import DateTime
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, Numeric

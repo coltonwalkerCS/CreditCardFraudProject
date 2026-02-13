@@ -25,4 +25,3 @@ class BaseRepo(Generic[ModelT]):
 
     def delete(self, session: Session, obj: ModelT) -> None:
         session.delete(obj)
-        session.delete(obj)

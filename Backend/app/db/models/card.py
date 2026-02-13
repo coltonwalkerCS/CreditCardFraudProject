@@ -1,8 +1,8 @@
 import uuid
 
 from app.db.base import Base
-from app.db.enums import CardBrand, CardStatus
 from app.db.models.mixins import TimestampMixin
+from app.domains.enums import CardBrand, CardStatus
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID

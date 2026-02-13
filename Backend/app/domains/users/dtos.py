@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
 from uuid import UUID
 
 from app.shared.dtos.base import BaseDto
 from app.shared.dtos.timestamp import TimestampedResponseDto
-from pydantic import EmailStr, Field
+from pydantic import Field
 
 
 class UserCreateRequestDto(BaseDto):
