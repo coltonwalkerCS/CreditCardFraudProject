@@ -34,7 +34,8 @@ def engine():
     if not DATABASE_URL_TEST:
         raise RuntimeError(
             "DATABASE_URL_TEST is not set. Add it to Backend/secrets/.env, e.g.\n"
-            "DATABASE_URL_TEST=postgresql+psycopg://postgres:password@localhost:5432/fraud_test"
+            "DATABASE_URL_TEST=postgresql+psycopg://postgres:password@localhost:5432/"
+            "fraud_test"
         )
 
     engine = create_engine(DATABASE_URL_TEST, future=True, pool_pre_ping=True)

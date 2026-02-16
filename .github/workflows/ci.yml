@@ -39,4 +39,11 @@ jobs:
       - run: |
           pip install poetry
           poetry install
-      - run: poetry run pytest
+      - name: Lint
+        run: |
+          poetry run black --check .
+          poetry run isort --check .
+          poetry run flake8
+
+      - name: Run Tests
+        run: poetry run pytest

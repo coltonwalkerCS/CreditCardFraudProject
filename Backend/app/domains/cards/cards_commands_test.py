@@ -134,7 +134,7 @@ def test_list_cards_for_user_returns_only_that_users_cards(
 
     c1 = make_card(user_id=user1.id, last4=1000)
     c2 = make_card(user_id=user1.id, last4=2000)
-    _other = make_card(user_id=user2.id, last4=9999)
+    make_card(user_id=user2.id, last4=9999)
 
     cards = list_cards_for_user(session, user1.id)
 
