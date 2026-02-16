@@ -109,5 +109,3 @@ def make_card(session, make_user):
         return create_card(session, dto)
 
     return _make
-    return _make
-    return _make

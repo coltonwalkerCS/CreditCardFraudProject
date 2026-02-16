@@ -17,12 +17,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("", response_model=UserResponseDto, status_code=status.HTTP_201_CREATED)
 def create_user(
-    body: UserCreateRequestDto,
+    request: UserCreateRequestDto,
     session: Session = Depends(get_session),
 ) -> UserResponseDto:
-    print("BODY: ", body)
     try:
-        return users_commands.create_user(session, body)
+        return users_commands.create_user(session, request)
     except users_commands.UsernameAlreadyExistsError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
@@ -41,11 +40,11 @@ def get_user(
 @router.patch("/{user_id}", response_model=UserResponseDto)
 def update_user(
     user_id: UUID,
-    body: UserUpdateRequestDto,
+    request: UserUpdateRequestDto,
     session: Session = Depends(get_session),
 ) -> UserResponseDto:
     try:
-        return users_commands.update_user(session, user_id, body)
+        return users_commands.update_user(session, user_id, request)
     except users_commands.UserNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except users_commands.UsernameAlreadyExistsError as e:
@@ -58,9 +57,6 @@ def delete_user(
     session: Session = Depends(get_session),
 ) -> None:
     try:
-        users_commands.delete_user(session, user_id)
-    except users_commands.UserNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         users_commands.delete_user(session, user_id)
     except users_commands.UserNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

@@ -14,7 +14,6 @@ def test_create_user_success(client: TestClient):
 
 def test_get_user_success(client: TestClient):
     created = client.post("/api/v1/users", json={"username": "testusername"}).json()
-    print("RESPONSE: ", created)
     user_id = created["id"]
 
     resp = client.get(f"/api/v1/users/{user_id}")
