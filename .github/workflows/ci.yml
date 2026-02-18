@@ -5,8 +5,7 @@ on:
   pull_request:
 
 jobs:
-
-  backend:
+  ci:
     runs-on: ubuntu-latest
 
     services:
@@ -29,16 +28,21 @@ jobs:
 
     defaults:
       run:
-        working-directory: Backend 
+        working-directory: .
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: |
-          pip install poetry
-          poetry install
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi --with dev
+
       - name: Lint
         run: |
           poetry run black --check .
