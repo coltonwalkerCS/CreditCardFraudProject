@@ -1,0 +1,39 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Backend services for a credit card fraud detection system."
+authors = [
+    {name = "Colton Walker"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "sqlalchemy (>=2.0.46,<3.0.0)",
+    "alembic (>=1.18.3,<2.0.0)",
+    "psycopg[binary] (>=3.3.2,<4.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "fastapi (>=0.129.0,<0.130.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.2,<10.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pre-commit (>=4.5.1,<5.0.0)",
+    "black (>=26.1.0,<27.0.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)"
+]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["app"]
