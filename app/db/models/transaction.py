@@ -32,3 +32,6 @@ class Transaction(Base, TimestampMixin):
     status: Mapped[TransactionStatus] = mapped_column(
         SAEnum(TransactionStatus, name="transaction_status"), nullable=False
     )
+    idempotency_key: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), unique=True, nullable=False
+    )
