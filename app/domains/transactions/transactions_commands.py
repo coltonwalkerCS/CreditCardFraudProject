@@ -33,8 +33,9 @@ def create_transacton(
         card_id=request.card_id,
         merchant_id=request.merchant_id,
         amount=request.amount,
-        occured_at=request.occured_at,
+        occurred_at=request.occurred_at,
         status=request.status,
+        idempotency_key=request.idempotency_key,
     )
 
     try:

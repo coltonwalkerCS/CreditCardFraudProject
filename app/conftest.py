@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,9 +14,11 @@ from app.db.base import Base
 from app.db.session import get_session
 from app.domains.cards.cards_commands import create_card
 from app.domains.cards.dtos import CardCreateRequestDto
-from app.domains.enums import CardBrand, CardStatus, MerchantCategory
+from app.domains.enums import CardBrand, CardStatus, MerchantCategory, TransactionStatus
 from app.domains.merchants.dtos import MerchantCreateRequestDto
 from app.domains.merchants.merchant_commands import create_merchant
+from app.domains.transactions.dtos import TransactionCreateRequestDto
+from app.domains.transactions.transactions_commands import create_transacton
 from app.domains.users.dtos import UserCreateRequestDto
 from app.domains.users.users_commands import create_user
 from app.main import app
@@ -133,6 +137,58 @@ def make_merchant(session):
         return create_merchant(
             session,
             MerchantCreateRequestDto(name=name, category=category),
+        )
+
+    return _make
+
+
+@pytest.fixture
+def make_transaction(session, make_user, make_card, make_merchant):
+    """
+    Fixture that creates a transaction through the command layer
+    (so tests cover create + commit behavior).
+    """
+
+    def _make(
+        *,
+        user_id=None,
+        card_id=None,
+        merchant_id=None,
+        amount: Decimal = Decimal("10.00"),
+        occurred_at: datetime | None = None,
+        status: TransactionStatus = TransactionStatus.APPROVED,
+        idempotency_key=None,
+    ):
+        # Create defaults if not provided
+        if user_id is None:
+            user = make_user()
+            user_id = user.id
+
+        if card_id is None:
+            card = make_card(user_id=user_id)
+            card_id = card.id
+
+        if merchant_id is None:
+            merchant = make_merchant()
+            merchant_id = merchant.id
+
+        if occurred_at is None:
+            occurred_at = datetime.now(timezone.utc)
+
+        if idempotency_key is None:
+            idempotency_key = uuid.uuid4()
+
+        return create_transacton(
+            session,
+            TransactionCreateRequestDto(
+                user_id=user_id,
+                card_id=card_id,
+                merchant_id=merchant_id,
+                amount=amount,
+                occurred_at=occurred_at,
+                status=status,
+                idempotency_key=idempotency_key,
+            ),
         )
 
     return _make

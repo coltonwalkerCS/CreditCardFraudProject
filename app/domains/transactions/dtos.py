@@ -14,7 +14,7 @@ class TransactionCreateRequestDto(BaseDto):
     card_id: UUID
     merchant_id: UUID
     amount: Decimal
-    occured_at: datetime
+    occurred_at: datetime
     status: TransactionStatus
     idempotency_key: UUID
 
@@ -29,6 +29,6 @@ class TransactionResponseDto(TimestampedResponseDto):
     card_id: UUID
     merchant_id: UUID
     amount: Decimal
-    occured_at: datetime
+    occurred_at: datetime
     status: TransactionStatus
     idempotency_key: UUID
