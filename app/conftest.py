@@ -12,9 +12,18 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import DATABASE_URL_TEST
 from app.db.base import Base
 from app.db.session import get_session
+from app.domains.alerts.alerts_commands import create_alert
+from app.domains.alerts.dtos import AlertCreateRequestDto
 from app.domains.cards.cards_commands import create_card
 from app.domains.cards.dtos import CardCreateRequestDto
-from app.domains.enums import CardBrand, CardStatus, MerchantCategory, TransactionStatus
+from app.domains.enums import (
+    AlertSeverity,
+    AlertStatus,
+    CardBrand,
+    CardStatus,
+    MerchantCategory,
+    TransactionStatus,
+)
 from app.domains.merchants.dtos import MerchantCreateRequestDto
 from app.domains.merchants.merchant_commands import create_merchant
 from app.domains.transactions.dtos import TransactionCreateRequestDto
@@ -188,6 +197,57 @@ def make_transaction(session, make_user, make_card, make_merchant):
                 occurred_at=occurred_at,
                 status=status,
                 idempotency_key=idempotency_key,
+            ),
+        )
+
+    return _make
+
+
+@pytest.fixture
+def make_alert(session, make_user, make_card, make_merchant, make_transaction):
+    """
+    Fixture that creates an alert through the command layer
+    (so tests cover create + commit behavior).
+    """
+
+    def _make(
+        *,
+        user_id=None,
+        card_id=None,
+        merchant_id=None,
+        transaction_id=None,
+        severity: AlertSeverity = AlertSeverity.MEDIUM,
+        status: AlertStatus = AlertStatus.OPEN,
+    ):
+
+        if user_id is None:
+            user = make_user()
+            user_id = user.id
+
+        if card_id is None:
+            card = make_card(user_id=user_id)
+            card_id = card.id
+
+        if merchant_id is None:
+            merchant = make_merchant()
+            merchant_id = merchant.id
+
+        if transaction_id is None:
+            transaction = make_transaction(
+                user_id=user_id,
+                card_id=card_id,
+                merchant_id=merchant_id,
+            )
+            transaction_id = transaction.id
+
+        return create_alert(
+            session,
+            AlertCreateRequestDto(
+                user_id=user_id,
+                card_id=card_id,
+                transaction_id=transaction_id,
+                severity=severity,
+                status=status,
             ),
         )
 
