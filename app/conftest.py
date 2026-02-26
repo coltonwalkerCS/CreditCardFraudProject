@@ -12,6 +12,8 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import DATABASE_URL_TEST
 from app.db.base import Base
 from app.db.session import get_session
+from app.domains.alert_findings.alert_findings_commands import create_alert_finding
+from app.domains.alert_findings.dtos import AlertFindingCreateRequestDto
 from app.domains.alerts.alerts_commands import create_alert
 from app.domains.alerts.dtos import AlertCreateRequestDto
 from app.domains.cards.cards_commands import create_card
@@ -21,6 +23,7 @@ from app.domains.enums import (
     AlertStatus,
     CardBrand,
     CardStatus,
+    FindingCode,
     MerchantCategory,
     TransactionStatus,
 )
@@ -248,6 +251,33 @@ def make_alert(session, make_user, make_card, make_merchant, make_transaction):
                 transaction_id=transaction_id,
                 severity=severity,
                 status=status,
+            ),
+        )
+
+    return _make
+
+
+@pytest.fixture
+def make_alert_finding(session, make_alert):
+    """
+    Fixture that creates an alert finding through the command layer
+    (so tests cover create + commit behavior).
+    """
+
+    def _make(
+        *,
+        alert_id=None,
+        code: FindingCode = FindingCode.VELOCITY,
+    ):
+        if alert_id is None:
+            alert = make_alert()
+            alert_id = alert.id
+
+        return create_alert_finding(
+            session,
+            AlertFindingCreateRequestDto(
+                alert_id=alert_id,
+                code=code,
             ),
         )
 
