@@ -12,6 +12,8 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import DATABASE_URL_TEST
 from app.db.base import Base
 from app.db.session import get_session
+from app.domains.alert_actions import alert_actions_commands
+from app.domains.alert_actions.dtos import AlertActionCreateRequestDto
 from app.domains.alert_findings.alert_findings_commands import create_alert_finding
 from app.domains.alert_findings.dtos import AlertFindingCreateRequestDto
 from app.domains.alerts.alerts_commands import create_alert
@@ -19,6 +21,8 @@ from app.domains.alerts.dtos import AlertCreateRequestDto
 from app.domains.cards.cards_commands import create_card
 from app.domains.cards.dtos import CardCreateRequestDto
 from app.domains.enums import (
+    ActorType,
+    AlertActionType,
     AlertSeverity,
     AlertStatus,
     CardBrand,
@@ -282,3 +286,31 @@ def make_alert_finding(session, make_alert):
         )
 
     return _make
+
+
+@pytest.fixture
+def make_alert_action(session, make_alert):
+    """
+    Creates an AlertAction using the command layer
+    Requires a make_alert fixture that returns an Alert ORM model with .id.
+    """
+
+    def _make_alert_action(
+        *,
+        alert_id=None,
+        action: AlertActionType = AlertActionType.ACK,
+        actor_type: ActorType = ActorType.SYSTEM,
+    ):
+        alert = make_alert() if alert_id is None else None
+        _alert_id = alert_id or alert.id
+
+        req = AlertActionCreateRequestDto(
+            alert_id=_alert_id,
+            action=action,
+            actor_type=actor_type,
+        )
+        created = alert_actions_commands.create_alert_action(session, req)
+
+        return created
+
+    return _make_alert_action
