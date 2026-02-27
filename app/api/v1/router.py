@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.domains.alert_actions.alert_actions_api import router as alert_actions_router
 from app.domains.alert_findings.alert_findings_api import (
     router as alert_findings_router,
 )
@@ -15,4 +16,5 @@ router.include_router(cards_router)
 router.include_router(merchants_router)
 router.include_router(transactions_router)
 router.include_router(alerts_router)
+router.include_router(alert_actions_router)
 router.include_router(alert_findings_router)
