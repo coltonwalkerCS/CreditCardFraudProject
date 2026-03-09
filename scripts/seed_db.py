@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.db.models.card import Card
 from app.db.models.merchant import Merchant
 from app.db.models.user import User
-from app.db.session import SessionLocal  # sessionmaker() -> Session
+from app.db.session import SessionLocal
 from app.domains.enums import CardBrand, CardStatus, MerchantCategory
 
 
@@ -46,8 +46,7 @@ def parse_args() -> SeedConfig:
 
 def reset_db(session: Session) -> None:
     """
-    Dev/demo convenience reset. If you have more tables later (transactions/alerts),
-    add them here in a sensible order or keep CASCADE.
+    Dev/demo reset.
     """
     session.execute(
         text(
@@ -64,7 +63,6 @@ def reset_db(session: Session) -> None:
 
 
 def _enum_values(e: type) -> list:
-    # Works for Python Enums; returns [EnumMember, ...]
     return list(e)
 
 
@@ -79,11 +77,10 @@ def seed_users(session: Session, cfg: SeedConfig) -> list[User]:
         user = User(id=uuid.uuid4(), username=username)
         session.add(user)
         try:
-            session.flush()  # catch unique constraint early
+            session.flush()
             created.append(user)
         except IntegrityError:
             session.rollback()
-            # User already exists; fetch it and continue
             existing = session.execute(
                 select(User).where(User.username == username)
             ).scalar_one()
@@ -148,8 +145,6 @@ def seed_cards(session: Session, cfg: SeedConfig, users: list[User]) -> list[Car
             last4 = random.randint(0, 9999)
             brand = random.choice(brands)
             status = random.choice(statuses)
-
-            # Keep expiry sane
             exp_month = random.randint(1, 12)
             exp_year = random.randint(2026, 2032)
 
