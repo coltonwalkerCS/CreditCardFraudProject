@@ -48,17 +48,11 @@ def reset_db(session: Session) -> None:
     """
     Dev/demo reset.
     """
-    session.execute(
-        text(
-            """
-TRUNCATE TABLE
-    cards,
-    merchants,
-    users
-RESTART IDENTITY CASCADE;
-"""
-        )
+    reset_text = text(
+        "TRUNCATE TABLE cards, merchants, users RESTART IDENTITY CASCADE;"
     )
+    session.execute(reset_text)
+
     session.commit()
 
 
