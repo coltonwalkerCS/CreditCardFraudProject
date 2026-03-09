@@ -1,4 +1,3 @@
-# tests/api/v1/alert_actions_api_test.py
 from __future__ import annotations
 
 import uuid
